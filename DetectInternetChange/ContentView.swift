@@ -7,10 +7,36 @@
 //
 
 import SwiftUI
+import Network
 
 struct ContentView: View {
+    @State private var networkDetected = true
+    
     var body: some View {
-        Text("Hello, World!")
+        VStack {
+            ZStack {
+                Color(self.networkDetected ? .green : .red)
+                    .edgesIgnoringSafeArea(.all)
+                Text(self.networkDetected ? "Internet connected" : "Internet not connected")
+                    .foregroundColor(.white)
+                    .font(.largeTitle)
+            }
+        }.onAppear() {
+            self.monitorNetwork()
+        }
+    }
+    
+    func monitorNetwork() {
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { path in
+            if path.status == .satisfied {
+                self.networkDetected = true
+            } else {
+                self.networkDetected = false
+            }
+        }
+        let queue = DispatchQueue(label: "Network")
+        monitor.start(queue: queue)
     }
 }
 
